@@ -22,7 +22,7 @@ export default function handler(req, res) {
     if (error) {
       console.log('error: ', error);
       console.error("Error executing command:", stderr);
-      return res.status(500).json({ error: "Error retrieving serial number", platform });
+      return res.status(500).json({ error: error, platform });
     }
 
     let serialNumber = stdout.trim();
