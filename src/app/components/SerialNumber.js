@@ -35,7 +35,7 @@ const SerialNumber = () => {
         User Id
       </h1>
       <div className=" font-semibold w-50">
-        {isLoading || !serialNum ? (
+        {isLoading || !serialNum ? ( 
           <p className="w-full bg-red-400 h-8 rounded-md animate-pulse"></p>
         ) : useEmptyObject(error) ? (
           <p
