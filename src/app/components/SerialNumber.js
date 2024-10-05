@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import useEmptyObject from "@/hooks/useEmptyObject";
+import generateDeviceId from "@/hooks/uuidGen";
 
 const initialState = {
   isLoading: false,
@@ -9,33 +10,32 @@ const initialState = {
 };
 
 const SerialNumber = () => {
-  const [state, setState] = useState(initialState);
-  const { isLoading, error, serialNum } = state;
+  // const [state, setState] = useState(initialState);
+  // const { isLoading, error, serialNum } = state;
+  // useEffect(() => {
+  //   const fetchSerialNumber = async () => {
+  //     setState((prev) => ({ ...prev, isLoading: true }));
+  //     try {
+  //       const { data = {} } = await axios.get("/api/uuid");
+  //       setState((prev) => ({ ...prev, serialNum: data?.serialNumber }));
+  //     } catch (err) {
+  //       setState((prev) => ({ ...prev, error: err }));
+  //     } finally {
+  //       setState((prev) => ({ ...prev, isLoading: false }));
+  //       console.error(error);
+  //     }
+  //   };
 
-  useEffect(() => {
-    const fetchSerialNumber = async () => {
-      setState((prev) => ({ ...prev, isLoading: true }));
-      try {
-        const { data = {} } = await axios.get("/api/uuid");
-        setState((prev) => ({ ...prev, serialNum: data?.serialNumber }));
-      } catch (err) {
-        setState((prev) => ({ ...prev, error: err }));
-      } finally {
-        setState((prev) => ({ ...prev, isLoading: false }));
-        console.error(error);
-      }
-    };
-
-    fetchSerialNumber();
-  }, []);
-
+  //   fetchSerialNumber();
+  // }, []);
+  const uuid = generateDeviceId();
   return (
     <div className="space-y-2 bg-slate-100 shadow rounded-md w-80 p-5">
       <h1 className="font-semibold text-2xl text-black/70 text-center">
         User Id
       </h1>
       <div className=" font-semibold w-50">
-        {isLoading || !serialNum ? ( 
+        {/* {isLoading || !serialNum ? (
           <p className="w-full bg-red-400 h-8 rounded-md animate-pulse"></p>
         ) : useEmptyObject(error) ? (
           <p
@@ -51,7 +51,13 @@ const SerialNumber = () => {
           >
             {serialNum}
           </p>
-        )}
+        )} */}
+        <p
+          title={uuid || "no value"}
+          className="h-8 grid place-items-center tracking-wide bg-red-400 text-white rounded-md min-w-fit max-w-full truncate"
+        >
+          {uuid || ""}
+        </p>
       </div>
     </div>
   );
