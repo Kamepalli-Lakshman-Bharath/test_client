@@ -32,6 +32,6 @@ export default function handler(req, res) {
       serialNumber = serialNumber.split(":")[1]?.trim(); // Extract after the colon for macOS
     }
 
-    res.status(200).json({ serialNumber });
+    res.status(200).json({ serialNumber, platform });
   });
 }
