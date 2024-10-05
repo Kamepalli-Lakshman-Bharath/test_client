@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+
 import SerialNumber from "./components/SerialNumber";
 
 export default function Home() {

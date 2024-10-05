@@ -1,6 +1,6 @@
-import useEmptyObject from "@/hooks/useEmptyObject";
-import axios from "axios";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import useEmptyObject from "@/hooks/useEmptyObject";
 
 const initialState = {
   isLoading: false,
