@@ -2,8 +2,7 @@ import { exec } from "child_process";
 import os from "os";
 
 export default function handler(req, res) {
-  const platform = os.platform(); // Get the operating system
-
+  const platform = os.platform(); // Detect the operating system
   let command;
 
   if (platform === "win32") {
@@ -12,28 +11,27 @@ export default function handler(req, res) {
   } else if (platform === "darwin") {
     // macOS command to get the serial number
     command = 'system_profiler SPHardwareDataType | grep "Serial Number"';
+  } else if (platform === "linux") {
+    // Linux command to get the serial number
+    command = "sudo dmidecode -s system-serial-number";
   } else {
-    // If the platform is not supported
-    return res.status(400).json({ error: "Unsupported platform", platform });
+    return res.status(400).json({ error: "Unsupported platform" });
   }
 
-  // Execute the system command
   exec(command, (error, stdout, stderr) => {
     if (error) {
+      console.error("Error executing command:", stderr);
       return res.status(500).json({ error: "Error retrieving serial number" });
     }
 
-    let serialNumber;
+    let serialNumber = stdout.trim();
 
     if (platform === "win32") {
-      // For Windows, we extract the serial number from the output
-      serialNumber = stdout.trim().split("\n")[1].trim();
+      serialNumber = serialNumber.split("\n")[1]?.trim(); // Get the second line for Windows
     } else if (platform === "darwin") {
-      // For macOS, we extract the serial number from the output
-      serialNumber = stdout.trim().split(":")[1].trim();
+      serialNumber = serialNumber.split(":")[1]?.trim(); // Extract after the colon for macOS
     }
 
-    // Return the serial number in the response
     res.status(200).json({ serialNumber });
   });
 }
