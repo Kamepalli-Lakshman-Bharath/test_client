@@ -14,7 +14,7 @@ export default function handler(req, res) {
     command = 'system_profiler SPHardwareDataType | grep "Serial Number"';
   } else {
     // If the platform is not supported
-    return res.status(400).json({ error: "Unsupported platform" });
+    return res.status(400).json({ error: "Unsupported platform", platform });
   }
 
   // Execute the system command
