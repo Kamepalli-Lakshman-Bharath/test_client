@@ -15,7 +15,7 @@ export default function handler(req, res) {
     // Linux command to get the serial number
     command = "sudo dmidecode -s system-serial-number";
   } else {
-    return res.status(400).json({ error: "Unsupported platform" });
+    return res.status(400).json({ error: "Unsupported platform", platform });
   }
 
   exec(command, (error, stdout, stderr) => {
