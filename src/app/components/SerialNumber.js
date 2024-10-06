@@ -13,27 +13,11 @@ const generateDeviceFingerprint = () => {
     // Time zone offset (consistent for the device)
     components.push(new Date().getTimezoneOffset());
 
-    // Available device memory (if supported)
-    if (navigator.deviceMemory) {
-      components.push(navigator.deviceMemory);
-    }
-
     // CPU cores (if supported)
     if (navigator.hardwareConcurrency) {
       components.push(navigator.hardwareConcurrency);
     }
 
-    // GPU information (if available)
-    const canvas = document.createElement("canvas");
-    const gl =
-      canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    if (gl) {
-      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-      if (debugInfo) {
-        components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL));
-        components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL));
-      }
-    }
 
     // Generate a hash from the components
     const fingerprint = components.join("###");
