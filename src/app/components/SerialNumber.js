@@ -11,17 +11,17 @@ const generateDeviceFingerprint = () => {
     components.push(window.screen.colorDepth);
 
     // Time zone offset (consistent for the device)
-    components.push(new Date().getTimezoneOffset());
+    // components.push(new Date().getTimezoneOffset());
 
-    // if (window.devicePixelRatio) {
-    //   components.push(window.devicePixelRatio);
-    // }
+    if (window.devicePixelRatio) {
+      components.push(window.devicePixelRatio);
+    }
     components.push('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
     // CPU cores (if supported)
-    // if (navigator.hardwareConcurrency) {
-    //   components.push(navigator.hardwareConcurrency);
-    // }
+    if (navigator.hardwareConcurrency) {
+      components.push(navigator.hardwareConcurrency);
+    }
 
 
     // Generate a hash from the components
