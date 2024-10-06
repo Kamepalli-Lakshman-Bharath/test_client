@@ -13,6 +13,11 @@ const generateDeviceFingerprint = () => {
     // Time zone offset (consistent for the device)
     components.push(new Date().getTimezoneOffset());
 
+    if (window.devicePixelRatio) {
+      components.push(window.devicePixelRatio);
+    }
+    components.push('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
     // CPU cores (if supported)
     if (navigator.hardwareConcurrency) {
       components.push(navigator.hardwareConcurrency);
