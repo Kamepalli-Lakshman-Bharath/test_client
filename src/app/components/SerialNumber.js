@@ -21,10 +21,10 @@ const generateDeviceFingerprint = () => {
     components.push("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
     // CPU cores (if supported)
-    if (navigator.hardwareConcurrency) {
-      components.push(navigator.hardwareConcurrency);
-      userObj.concurrency = navigator.hardwareConcurrency;
-    }
+    // if (navigator.hardwareConcurrency) {
+    //   components.push(navigator.hardwareConcurrency);
+    //   userObj.concurrency = navigator.hardwareConcurrency;
+    // }
     console.log(userObj);
     // Generate a hash from the components
     const fingerprint = components.join("###");
