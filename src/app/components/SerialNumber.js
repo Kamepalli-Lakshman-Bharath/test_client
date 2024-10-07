@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import sha256 from 'crypto-js/sha256';
+import sha256 from "crypto-js/sha256";
 
 // Generate Audio Fingerprint
 function generateAudioFingerprint() {
@@ -191,7 +191,7 @@ async function generateDeviceFingerprint() {
   return null;
 }
 
-const DeviceFingerprint = () => { 
+const DeviceFingerprint = () => {
   const [fingerprint, setFingerprint] = useState("Loading...");
 
   // Use async function inside useEffect to handle async fingerprint generation
@@ -204,14 +204,14 @@ const DeviceFingerprint = () => {
   }, []);
 
   return (
-    <div className="space-y-2 bg-slate-100 shadow rounded-md w-80 p-5">
+    <div className="space-y-2 bg-slate-100 shadow rounded-md min-w-80 max-w-fit p-5">
       <h1 className="font-semibold text-2xl text-black/70 text-center">
         Device Fingerprint
       </h1>
-      <div className="font-semibold w-50">
+      <div className="font-semibold w-50 ">
         <p
           title={fingerprint || "No value"}
-          className="h-8 grid place-items-center tracking-wide bg-red-400 text-white rounded-md min-w-fit max-w-full truncate"
+          className="h-8 grid px-1 place-items-center tracking-wide bg-red-400 text-white rounded-md min-w-fit max-w-full truncate"
         >
           {fingerprint || ""}
         </p>
