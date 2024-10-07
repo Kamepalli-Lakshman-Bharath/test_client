@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const generateDeviceFingerprint = () => {
   const components = [];
+  const userObj = {};
 
   // Ensure this code only runs in the browser (not during SSR)
   if (typeof window !== "undefined") {
@@ -9,20 +10,25 @@ const generateDeviceFingerprint = () => {
     components.push(window.screen.width);
     components.push(window.screen.height);
     components.push(window.screen.colorDepth);
+    userObj.width = window.screen.width;
+    userObj.height = window.screen.height;
+    userObj.colorDepth = window.screen.colorDepth;
 
     // Time zone offset (consistent for the device)
-    // components.push(new Date().getTimezoneOffset());
+    components.push(new Date().getTimezoneOffset());
+    userObj.time = new Date().getTimezoneOffset();
 
     if (window.devicePixelRatio) {
       components.push(window.devicePixelRatio);
+      userObj.pixel = window.devicePixelRatio;
     }
-    components.push('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    components.push("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
     // CPU cores (if supported)
     if (navigator.hardwareConcurrency) {
       components.push(navigator.hardwareConcurrency);
+      userObj.pixel = navigator.hardwareConcurrency;
     }
-
 
     // Generate a hash from the components
     const fingerprint = components.join("###");
