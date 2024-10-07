@@ -7,10 +7,8 @@ const generateDeviceFingerprint = () => {
   // Ensure this code only runs in the browser (not during SSR)
   if (typeof window !== "undefined") {
     // Screen properties (consistent across browsers)
-    components.push(window.screen.width * window.devicePixelRatio);
     components.push(window.screen.height);
     components.push(window.screen.colorDepth);
-    userObj.width = window.screen.width * window.devicePixelRatio;
     userObj.height = window.screen.height;
     userObj.colorDepth = window.screen.colorDepth;
 
