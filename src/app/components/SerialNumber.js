@@ -14,10 +14,10 @@ const generateDeviceFingerprint = () => {
     components.push(new Date().getTimezoneOffset());
     userObj.time = new Date().getTimezoneOffset();
 
-    if (window.devicePixelRatio) {
-      components.push(window.devicePixelRatio);
-      userObj.pixel = window.devicePixelRatio;
-    }
+    // if (window.devicePixelRatio) {
+    //   components.push(window.devicePixelRatio);
+    //   userObj.pixel = window.devicePixelRatio;
+    // }
     components.push("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
     // CPU cores (if supported)
