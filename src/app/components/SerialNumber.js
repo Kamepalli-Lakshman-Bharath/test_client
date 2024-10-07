@@ -35,7 +35,7 @@ async function generateDeviceFingerprint() {
   const components = [];
 
   if (typeof window !== "undefined" && window.navigator) {
-    // Existing components
+    // Stable components that don't change between tabs
     if (navigator.hardwareConcurrency) {
       components.push(`cores:${navigator.hardwareConcurrency}`);
     }
@@ -53,6 +53,7 @@ async function generateDeviceFingerprint() {
       components.push(`innerSize:${window.innerWidth}x${window.innerHeight}`);
     }
 
+    // GPU Information (shouldn't change between tabs)
     const canvas = document.createElement("canvas");
     const gl =
       canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
@@ -82,40 +83,7 @@ async function generateDeviceFingerprint() {
     const audioFingerprint = await generateAudioFingerprint();
     components.push(`audio:${audioFingerprint}`);
 
-    // Additional unique properties
-    // Battery information
-    if (navigator.getBattery) {
-      const battery = await navigator.getBattery();
-      components.push(`battery:${battery.level},charging:${battery.charging}`);
-    }
-
-    // Network information
-    if (navigator.connection) {
-      const { effectiveType, downlink, rtt } = navigator.connection;
-      components.push(
-        `network:${effectiveType},downlink:${downlink},rtt:${rtt}`
-      );
-    }
-
-    // Storage estimation
-    if (navigator.storage && navigator.storage.estimate) {
-      const storage = await navigator.storage.estimate();
-      components.push(`storage:${storage.quota},usage:${storage.usage}`);
-    }
-
-    // Touch support
-    components.push(`touchSupport:${"ontouchstart" in window}`);
-
-    // Media devices (camera, microphone)
-    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const deviceList = devices
-        .map((device) => `${device.kind}:${device.label}`)
-        .join(",");
-      components.push(`mediaDevices:${deviceList}`);
-    }
-
-    // Canvas fingerprint
+    // Canvas fingerprint (stable between tabs)
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
