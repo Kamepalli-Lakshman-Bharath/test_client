@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import sha256 from 'crypto-js/sha256';
 
 // Generate Audio Fingerprint
 function generateAudioFingerprint() {
@@ -37,7 +38,7 @@ async function generateDeviceFingerprint() {
   const components = [];
 
   if (typeof window !== "undefined" && window.navigator) {
-    // Stable components that don't change between tabs
+    // Stable components
     if (navigator.hardwareConcurrency) {
       components.push(`cores:${navigator.hardwareConcurrency}`);
     }
@@ -55,7 +56,64 @@ async function generateDeviceFingerprint() {
       components.push(`innerSize:${window.innerWidth}x${window.innerHeight}`);
     }
 
-    // GPU Information (shouldn't change between tabs)
+    if (navigator.deviceMemory) {
+      components.push(`memory:${navigator.deviceMemory}`);
+    }
+
+    if (navigator.platform) {
+      components.push(`platform:${navigator.platform}`);
+    }
+
+    // Browser language and locale
+    components.push(`language:${navigator.language}`);
+    if (navigator.languages) {
+      components.push(`languages:${navigator.languages.join(",")}`);
+    }
+
+    // Touchscreen support
+    components.push(`touchPoints:${navigator.maxTouchPoints}`);
+
+    // CPU architecture (32-bit vs. 64-bit)
+    const is64Bit =
+      navigator.platform.indexOf("64") !== -1 ? "64-bit" : "32-bit";
+    components.push(`cpuArchitecture:${is64Bit}`);
+
+    // Session and Local Storage support
+    try {
+      const test = "storage_test";
+      sessionStorage.setItem(test, test);
+      sessionStorage.removeItem(test);
+      components.push("sessionStorage:available");
+    } catch (e) {
+      components.push("sessionStorage:notAvailable");
+    }
+
+    try {
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      components.push("localStorage:available");
+    } catch (e) {
+      components.push("localStorage:notAvailable");
+    }
+
+    // Cookies enabled
+    components.push(`cookiesEnabled:${navigator.cookieEnabled}`);
+
+    // Media devices (camera, microphone, etc.)
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioVideoDevices = devices
+        .filter(
+          (device) =>
+            device.kind === "audioinput" || device.kind === "videoinput"
+        )
+        .map((device) => `${device.kind}:${device.label}`);
+      components.push(`mediaDevices:${audioVideoDevices.join(",")}`);
+    } catch (e) {
+      components.push("mediaDevices:notSupported");
+    }
+
+    // GPU Information
     const canvas = document.createElement("canvas");
     const gl =
       canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
@@ -68,24 +126,22 @@ async function generateDeviceFingerprint() {
       }
     }
 
-    if (navigator.deviceMemory) {
-      components.push(`memory:${navigator.deviceMemory}`);
-    }
-
-    if (navigator.platform) {
-      components.push(`platform:${navigator.platform}`);
-    }
+    // Browser Plugins
+    const plugins = Array.from(navigator.plugins)
+      .map((plugin) => plugin.name)
+      .join(",");
+    components.push(`plugins:${plugins}`);
 
     components.push(`ua:${navigator.userAgent}`);
 
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     components.push(`tz:${timeZone}`);
 
-    // Add the audio fingerprint
+    // Audio fingerprint
     const audioFingerprint = await generateAudioFingerprint();
     components.push(`audio:${audioFingerprint}`);
 
-    // Canvas fingerprint (stable between tabs)
+    // Enhanced canvas fingerprinting (including WebGL)
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
@@ -104,22 +160,38 @@ async function generateDeviceFingerprint() {
       components.push(`canvas:notSupported`);
     }
 
-    // Final fingerprint generation
-    const fingerprint = components.join("|||");
-    let hash = 0;
-    for (let i = 0; i < fingerprint.length; i++) {
-      const char = fingerprint.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash;
+    // WebRTC IP Detection
+    try {
+      const rtcConnection = new RTCPeerConnection({ iceServers: [] });
+      rtcConnection.createDataChannel("");
+      rtcConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          const candidate = event.candidate.candidate;
+          const ipMatch = candidate.match(/([0-9]{1,3}\.){3}[0-9]{1,3}/);
+          if (ipMatch) {
+            components.push(`localIP:${ipMatch[0]}`);
+          }
+        }
+      };
+      await rtcConnection.createOffer();
+      await rtcConnection.setLocalDescription(rtcConnection.localDescription);
+    } catch (e) {
+      components.push(`webrtcIP:notSupported`);
     }
 
-    return Math.abs(hash).toString(16);
+    // Final fingerprint generation
+    const fingerprint = components.join("|||");
+
+    // Use SHA-256 for better hashing
+    const hash = sha256(fingerprint).toString();
+
+    return hash;
   }
 
   return null;
 }
 
-const DeviceFingerprint = () => {
+const DeviceFingerprint = () => { 
   const [fingerprint, setFingerprint] = useState("Loading...");
 
   // Use async function inside useEffect to handle async fingerprint generation
