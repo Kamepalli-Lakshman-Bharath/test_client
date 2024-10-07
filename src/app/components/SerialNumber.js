@@ -42,7 +42,7 @@ const generateDeviceFingerprint = () => {
     // Convert hash to a hexadecimal string
     return Math.abs(hash).toString(16);
   }
-
+  console.log(userObj);
   return "unknown"; // Fallback value during SSR
 };
 
