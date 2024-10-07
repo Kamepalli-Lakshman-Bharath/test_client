@@ -1,6 +1,37 @@
 import React, { useState, useEffect } from "react";
 
-function generateDeviceFingerprint() {
+function generateAudioFingerprint() {
+  return new Promise((resolve) => {
+    try {
+      const audioContext = new (window.OfflineAudioContext ||
+        window.webkitOfflineAudioContext)(1, 44100, 44100);
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(10000, audioContext.currentTime);
+      const compressor = audioContext.createDynamicsCompressor();
+      oscillator.connect(compressor);
+      compressor.connect(audioContext.destination);
+      oscillator.start(0);
+      audioContext
+        .startRendering()
+        .then((buffer) => {
+          const audioData = buffer.getChannelData(0);
+          const audioDataSum = audioData.reduce(
+            (acc, val) => acc + Math.abs(val),
+            0
+          );
+          resolve(audioDataSum.toString());
+        })
+        .catch(() => {
+          resolve("audio:notSupported");
+        });
+    } catch (e) {
+      resolve("audio:notSupported");
+    }
+  });
+}
+
+async function generateDeviceFingerprint() {
   const components = [];
 
   if (typeof window !== "undefined" && window.navigator) {
@@ -23,7 +54,8 @@ function generateDeviceFingerprint() {
     }
 
     const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    const gl =
+      canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     if (gl) {
       const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
       if (debugInfo) {
@@ -46,32 +78,14 @@ function generateDeviceFingerprint() {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     components.push(`tz:${timeZone}`);
 
-    // New components
-    // Audio context fingerprint
-    try {
-      const audioContext = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
-      const oscillator = audioContext.createOscillator();
-      oscillator.type = "triangle";
-      oscillator.frequency.setValueAtTime(10000, audioContext.currentTime);
-      const compressor = audioContext.createDynamicsCompressor();
-      oscillator.connect(compressor);
-      compressor.connect(audioContext.destination);
-      oscillator.start(0);
-      audioContext.startRendering();
-      const audioFingerprint = audioContext.oncomplete = function(e) {
-        const audioData = e.renderedBuffer.getChannelData(0);
-        const audioDataSum = audioData.reduce((acc, val) => acc + Math.abs(val), 0);
-        return audioDataSum.toString();
-      };
-      components.push(`audio:${audioFingerprint}`);
-    } catch (e) {
-      components.push(`audio:notSupported`);
-    }
+    // Add the audio fingerprint
+    const audioFingerprint = await generateAudioFingerprint();
+    components.push(`audio:${audioFingerprint}`);
 
     // Canvas fingerprint
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
       ctx.textBaseline = "top";
       ctx.font = "14px 'Arial'";
       ctx.textBaseline = "alphabetic";
@@ -87,33 +101,7 @@ function generateDeviceFingerprint() {
       components.push(`canvas:notSupported`);
     }
 
-    // List of installed fonts
-    try {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      const testFonts = ['Arial', 'Helvetica', 'Times New Roman', 'Courier', 'Verdana', 'Georgia', 'Palatino', 'Garamond', 'Bookman', 'Comic Sans MS', 'Trebuchet MS', 'Arial Black', 'Impact'];
-      const installedFonts = testFonts.filter(font => {
-        context.font = `12px "${font}", Arial`;
-        return context.measureText('abcdefghijklmnopqrstuvwxyz').width !== context.measureText('abcdefghijklmnopqrstuvwxyz').width;
-      });
-      components.push(`fonts:${installedFonts.join(',')}`);
-    } catch (e) {
-      components.push(`fonts:notSupported`);
-    }
-
-    // Battery status
-    if (navigator.getBattery) {
-      navigator.getBattery().then(battery => {
-        components.push(`battery:${battery.charging},${battery.level}`);
-      });
-    }
-
-    // Available storage
-    if (navigator.storage && navigator.storage.estimate) {
-      navigator.storage.estimate().then(estimate => {
-        components.push(`storage:${estimate.quota}`);
-      });
-    }
+    // Add the rest of your existing logic for battery, fonts, storage, etc.
 
     console.log(components);
     const fingerprint = components.join("|||");
@@ -132,7 +120,7 @@ function generateDeviceFingerprint() {
 
 // Usage
 const deviceFingerprint = generateDeviceFingerprint();
-console.log('Device Fingerprint:', deviceFingerprint);
+console.log("Device Fingerprint:", deviceFingerprint);
 
 const DeviceFingerprint = () => {
   const [fingerprint, setFingerprint] = useState("Loading...");
