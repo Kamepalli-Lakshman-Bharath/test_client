@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 
+// Generate Audio Fingerprint
 function generateAudioFingerprint() {
   return new Promise((resolve) => {
     try {
@@ -31,6 +32,7 @@ function generateAudioFingerprint() {
   });
 }
 
+// Generate Device Fingerprint
 async function generateDeviceFingerprint() {
   const components = [];
 
@@ -117,16 +119,16 @@ async function generateDeviceFingerprint() {
   return null;
 }
 
-// Usage
-const deviceFingerprint = generateDeviceFingerprint();
-console.log("Device Fingerprint:", deviceFingerprint);
-
 const DeviceFingerprint = () => {
   const [fingerprint, setFingerprint] = useState("Loading...");
 
+  // Use async function inside useEffect to handle async fingerprint generation
   useEffect(() => {
-    const fp = generateDeviceFingerprint();
-    setFingerprint(fp);
+    const fetchFingerprint = async () => {
+      const fp = await generateDeviceFingerprint();
+      setFingerprint(fp);
+    };
+    fetchFingerprint();
   }, []);
 
   return (
