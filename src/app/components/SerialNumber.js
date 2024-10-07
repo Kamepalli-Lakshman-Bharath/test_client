@@ -14,17 +14,17 @@ const generateDeviceFingerprint = () => {
     components.push(new Date().getTimezoneOffset());
     userObj.time = new Date().getTimezoneOffset();
 
-    // if (window.devicePixelRatio) {
-    //   components.push(window.devicePixelRatio);
-    //   userObj.pixel = window.devicePixelRatio;
-    // }
+    if (window.devicePixelRatio) {
+      components.push(window.devicePixelRatio);
+      userObj.pixel = window.devicePixelRatio;
+    }
     components.push("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
     // CPU cores (if supported)
-    if (navigator.hardwareConcurrency) {
-      components.push(navigator.hardwareConcurrency);
-      userObj.pixel = navigator.hardwareConcurrency;
-    }
+    // if (navigator.hardwareConcurrency) {
+    //   components.push(navigator.hardwareConcurrency);
+    //   userObj.pixel = navigator.hardwareConcurrency;
+    // }
     console.log(userObj);
     // Generate a hash from the components
     const fingerprint = components.join("###");
