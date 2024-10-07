@@ -1,64 +1,31 @@
 import React, { useState, useEffect } from "react";
 
-/*const generateDeviceFingerprint = () => {
-  const components = [];
-
-  // Ensure this code only runs in the browser (not during SSR)
-  if (typeof window !== "undefined") {
-    // Screen properties (consistent across browsers)
-    // components.push(window.screen.width);
-    // components.push(window.screen.height);
-    components.push(window.screen.colorDepth);
-
-    // Time zone offset (consistent for the device)
-    components.push(new Date().getTimezoneOffset());
-
-    if (window.devicePixelRatio) {
-      components.push(window.devicePixelRatio);
-    }
-    components.push("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
-    // CPU cores (if supported)
-    // if (navigator.hardwareConcurrency) {
-      // components.push(navigator.hardwareConcurrency);
-    // }
-
-    // Generate a hash from the components
-    const fingerprint = components.join("###");
-    let hash = 0;
-    for (let i = 0; i < fingerprint.length; i++) {
-      const char = fingerprint.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-
-    // Convert hash to a hexadecimal string
-    return Math.abs(hash).toString(16);
-  }
-
-  return "unknown"; // Fallback value during SSR
-}; */
-
-function generateHardwareFingerprint() {
+function generateDeviceFingerprint() {
   const components = [];
 
   if (typeof window !== "undefined" && window.navigator) {
-    // CPU information
+    // Hardware concurrency (CPU cores)
     if (navigator.hardwareConcurrency) {
       components.push(`cores:${navigator.hardwareConcurrency}`);
     }
 
-    // Device memory
-    if (navigator.deviceMemory) {
-      components.push(`memory:${navigator.deviceMemory}`);
+    // Screen properties
+    if (window.screen) {
+      components.push(`screen:${screen.width}x${screen.height}`);
+      components.push(`depth:${screen.colorDepth}`);
     }
 
-    // Screen color depth
-    if (window.screen && window.screen.colorDepth) {
-      components.push(`color:${window.screen.colorDepth}`);
+    // Device pixel ratio
+    if (window.devicePixelRatio) {
+      components.push(`pixelRatio:${window.devicePixelRatio}`);
     }
 
-    // GPU information
+    // Available screen size (may vary slightly between browsers but useful for device characterization)
+    if (window.innerWidth && window.innerHeight) {
+      components.push(`innerSize:${window.innerWidth}x${window.innerHeight}`);
+    }
+
+    // GPU info (can be detailed and device-specific)
     const canvas = document.createElement("canvas");
     const gl =
       canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
@@ -71,53 +38,41 @@ function generateHardwareFingerprint() {
       }
     }
 
-    // Audio context (simplified, synchronous version)
-    try {
-      const audioContext = new (window.OfflineAudioContext ||
-        window.webkitOfflineAudioContext)(1, 44100, 44100);
-      const oscillator = audioContext.createOscillator();
-      oscillator.type = "triangle";
-      oscillator.frequency.setValueAtTime(10000, audioContext.currentTime);
-      const compressor = audioContext.createDynamicsCompressor();
-      oscillator.connect(compressor);
-      compressor.connect(audioContext.destination);
-      oscillator.start(0);
-      audioContext.startRendering();
-      const audioFingerprint = audioContext.currentTime.toString();
-      components.push(`audio:${audioFingerprint}`);
-    } catch (e) {
-      console.error("Audio fingerprinting failed:", e);
+    if (navigator.deviceMemory) {
+      components.push(`memory:${navigator.deviceMemory}`);
     }
 
-    // Timezone
-    const timezoneOffset = new Date().getTimezoneOffset();
-    components.push(`timezone:${timezoneOffset}`);
-    console.log('components: ', components);
+    if (navigator.platform) {
+      components.push(`platform:${navigator.platform}`);
+    }
 
-    // Generate a hash from the components
-    const fingerprint = components.join("|");
+    components.push(`ua:${navigator.userAgent}`);
+
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    components.push(`tz:${timeZone}`);
+
+    const fingerprint = components.join("|||");
     let hash = 0;
     for (let i = 0; i < fingerprint.length; i++) {
       const char = fingerprint.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      hash = hash & hash;
     }
 
-    // Convert hash to a hexadecimal string
     return Math.abs(hash).toString(16);
   }
 
-  return null; // Return null if window is undefined (e.g., server-side rendering)
+  return null;
 }
 
-
+const deviceFingerprint = generateDeviceFingerprint();
+console.log("Device Fingerprint:", deviceFingerprint);
 
 const DeviceFingerprint = () => {
   const [fingerprint, setFingerprint] = useState("Loading...");
 
   useEffect(() => {
-    // Generate fingerprint on the client side only after mounting
-    const fp = generateHardwareFingerprint();
+    const fp = generateDeviceFingerprint();
     setFingerprint(fp);
   }, []);
 
