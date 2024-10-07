@@ -29,7 +29,7 @@ const generateDeviceFingerprint = () => {
       components.push(navigator.hardwareConcurrency);
       userObj.pixel = navigator.hardwareConcurrency;
     }
-
+    console.log(userObj);
     // Generate a hash from the components
     const fingerprint = components.join("###");
     let hash = 0;
@@ -42,7 +42,6 @@ const generateDeviceFingerprint = () => {
     // Convert hash to a hexadecimal string
     return Math.abs(hash).toString(16);
   }
-  console.log(userObj);
   return "unknown"; // Fallback value during SSR
 };
 
