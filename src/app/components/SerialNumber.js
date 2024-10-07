@@ -82,6 +82,39 @@ async function generateDeviceFingerprint() {
     const audioFingerprint = await generateAudioFingerprint();
     components.push(`audio:${audioFingerprint}`);
 
+    // Additional unique properties
+    // Battery information
+    if (navigator.getBattery) {
+      const battery = await navigator.getBattery();
+      components.push(`battery:${battery.level},charging:${battery.charging}`);
+    }
+
+    // Network information
+    if (navigator.connection) {
+      const { effectiveType, downlink, rtt } = navigator.connection;
+      components.push(
+        `network:${effectiveType},downlink:${downlink},rtt:${rtt}`
+      );
+    }
+
+    // Storage estimation
+    if (navigator.storage && navigator.storage.estimate) {
+      const storage = await navigator.storage.estimate();
+      components.push(`storage:${storage.quota},usage:${storage.usage}`);
+    }
+
+    // Touch support
+    components.push(`touchSupport:${"ontouchstart" in window}`);
+
+    // Media devices (camera, microphone)
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const deviceList = devices
+        .map((device) => `${device.kind}:${device.label}`)
+        .join(",");
+      components.push(`mediaDevices:${deviceList}`);
+    }
+
     // Canvas fingerprint
     try {
       const canvas = document.createElement("canvas");
@@ -101,9 +134,7 @@ async function generateDeviceFingerprint() {
       components.push(`canvas:notSupported`);
     }
 
-    // Add the rest of your existing logic for battery, fonts, storage, etc.
-
-    console.log(components);
+    // Final fingerprint generation
     const fingerprint = components.join("|||");
     let hash = 0;
     for (let i = 0; i < fingerprint.length; i++) {
