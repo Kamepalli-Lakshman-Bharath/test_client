@@ -51,6 +51,7 @@ function generateDeviceFingerprint() {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     components.push(`tz:${timeZone}`);
 
+    console.log(components);
     const fingerprint = components.join("|||");
     let hash = 0;
     for (let i = 0; i < fingerprint.length; i++) {
